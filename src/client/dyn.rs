@@ -1,6 +1,4 @@
 /// Dynamically constructed multipart bodies.
-extern crate mime;
-extern crate buf_redux;
 
 use self::buf_redux::BufReader;
 use self::buf_redux::strategy::{DefaultReadStrategy, DefaultMoveStrategy};
