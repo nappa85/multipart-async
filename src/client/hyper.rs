@@ -12,15 +12,18 @@
 //! Also see: [`lazy::Multipart::client_request()`](../lazy/struct.Multipart.html#method.client_request)
 //! and [`lazy::Multipart::client_request_mut()`](../lazy/struct.Multipart.html#method.client_request_mut)
 //! (adaptors for `hyper::client::RequestBuilder`).
+extern crate mime;
+
 use hyper::header::{ContentType, ContentLength};
 use hyper::Method;
-use mime::{Mime, TopLevel, SubLevel, Attr, Value};
+// use self::mime::{Mime, TopLevel, SubLevel, Attr, Value};
+use self::mime::Mime;
 
 use hyper::client::Request as HyperRequest;
 
 use super::Request;
 
-impl<'req> Request for HyperRequest<'req> {
+impl Request for HyperRequest {
     fn set_method(&mut self) {
         self.set_method(Method::Post);
     }
@@ -41,8 +44,9 @@ pub fn content_type(bound: &str) -> ContentType {
 }
 
 fn multipart_mime(bound: &str) -> Mime {
-    Mime(
-        TopLevel::Multipart, SubLevel::Ext("form-data".into()),
-        vec![(Attr::Ext("boundary".into()), Value::Ext(bound.into()))]
-    )         
+//     Mime(
+//         TopLevel::Multipart, SubLevel::Ext("form-data".into()),
+//         vec![(Attr::Ext("boundary".into()), Value::Ext(bound.into()))]
+//     )
+    ("multipart/form-data; boundary=".to_owned() + bound).parse().unwrap()
 }

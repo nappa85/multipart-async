@@ -8,8 +8,13 @@
 //! default).
 //!
 //! Use this when sending POST requests with files to a server.
-use mime::Mime;
-use buf_redux::{self, BufReader, copy_buf};
+extern crate mime;
+extern crate mime_guess;
+extern crate buf_redux;
+
+use self::mime::Mime;
+use self::buf_redux::BufReader;
+use self::buf_redux::strategy::{DefaultReadStrategy, DefaultMoveStrategy};
 
 use std::borrow::Cow;
 use std::fmt::Write as FmtWrite;
@@ -215,7 +220,7 @@ impl FieldHeader {
         if let Some(content_type) = content_type {
             Self::new(name, Some(&content_type), filename)
         } else {
-            Self::new(name, Some(&::mime_guess::octet_stream()), None)
+            Self::new(name, Some(&mime_guess::octet_stream()), None)
         }
     }
 
@@ -251,8 +256,8 @@ impl<'a> TextField<'a> {
 
 impl<'a> Field for TextField<'a> {
     fn write_out<W: Write>(&mut self, wrt: &mut W) -> io::Result<FieldStatus> {
-        try!(buf_redux::copy_buf(&mut self.header.0, wrt));
-        try!(buf_redux::copy_buf(&mut self.text, wrt));
+        try!(self::buf_redux::copy_buf(&mut self.header.0, wrt));
+        try!(self::buf_redux::copy_buf(&mut self.text, wrt));
 
         Ok(
             if self.text.at_end() {
@@ -279,19 +284,19 @@ impl<'a, S: Into<Cow<'a, str>>> From<S> for CowStr<'a> {
     }
 }
 
-pub type FileField = StreamField<BufReader<File>>;
+pub type FileField = StreamField<BufReader<File, DefaultReadStrategy, DefaultMoveStrategy>>;
 
 pub struct StreamField<R> {
     header: FieldHeader,
     stream: R,
 }
 
-impl<R: Read> StreamField<BufReader<R>> {
+impl<R: Read> StreamField<BufReader<R, DefaultReadStrategy, DefaultMoveStrategy>> {
     pub fn new(name: &str, stream: R, content_type: Option<&Mime>, filename: Option<&str>) -> Self {
         StreamField::buffered(name, BufReader::new(stream), content_type, filename)
     }
 
-    pub fn boxed<'a>(self) -> StreamField<BufReader<Box<Read + 'a>>> where R: 'a {
+    pub fn boxed<'a>(self) -> StreamField<BufReader<Box<Read + 'a>, DefaultReadStrategy, DefaultMoveStrategy>> where R: 'a {
         StreamField {
             header: self.header,
             stream: self.stream.boxed(),
@@ -328,9 +333,9 @@ impl FileField {
 
 impl<R: BufRead> Field for StreamField<R> {
     fn write_out<W: Write>(&mut self, wrt: &mut W) -> io::Result<FieldStatus> {
-        try!(buf_redux::copy_buf(&mut self.header.0, wrt));
+        try!(self::buf_redux::copy_buf(&mut self.header.0, wrt));
 
-        let read = try!(buf_redux::copy_buf(&mut self.stream, wrt));
+        let read = try!(self::buf_redux::copy_buf(&mut self.stream, wrt));
 
         Ok(
             if self.header.at_end() && read == 0 {
@@ -427,7 +432,7 @@ impl Boundary {
 }
 
 fn mime_filename(path: &Path) -> (Mime, Option<&str>) {
-    let content_type = ::mime_guess::guess_mime_type(path);
+    let content_type = mime_guess::guess_mime_type(path);
     let filename = opt_filename(path);
     (content_type, filename)
 }
@@ -456,7 +461,7 @@ impl<T: AsRef<[u8]>> CursorExt for Cursor<T> {
     }
 
     fn try_write_all<W: Write>(&mut self, w: &mut W) -> io::Result<bool> {
-        try!(copy_buf(self, w));
+        try!(self::buf_redux::copy_buf(self, w));
 
         Ok(self.at_end())
     }

@@ -1,8 +1,11 @@
 /// Dynamically constructed multipart bodies.
+extern crate mime;
+extern crate buf_redux;
 
-use buf_redux::BufReader;
+use self::buf_redux::BufReader;
+use self::buf_redux::strategy::{DefaultReadStrategy, DefaultMoveStrategy};
 
-use mime::Mime;
+use self::mime::Mime;
 
 use std::borrow::Cow;
 use std::fs::File;
@@ -78,7 +81,7 @@ enum DynField<'a> {
     Text(TextField<'a>),
     File(FileField),
     Buffered(StreamField<Box<BufRead + 'a>>),
-    Stream(StreamField<BufReader<Box<Read + 'a>>>),
+    Stream(StreamField<BufReader<Box<Read + 'a>, DefaultReadStrategy, DefaultMoveStrategy>>),
 }
 
 impl<'a> Field for DynField<'a> {
