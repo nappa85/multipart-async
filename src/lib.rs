@@ -46,8 +46,8 @@ use std::str::Utf8Error;
 use std::{io, ops};
 
 // FIXME: after server prototype is working
-//#[cfg(feature = "client")]
-//pub mod client;
+#[cfg(feature = "client")]
+pub mod client;
 
 #[cfg(feature = "server")]
 pub mod server;
