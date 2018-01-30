@@ -391,7 +391,9 @@ impl<'d> AsRef<[u8]> for CowStrAsRef<'d> {
 
 #[cfg(feature = "hyper")]
 mod hyper {
-    use hyper::client::{Body, Client, IntoUrl, RequestBuilder, Response};
+    //use hyper::client::{, , IntoUrl, RequestBuilder, };
+    use hyper::{Body, Response, Uri};
+    use hyper::client::Client;
     use hyper::Result as HyperResult;
 
     impl<'n, 'd> super::Multipart<'n, 'd> {
@@ -400,7 +402,7 @@ mod hyper {
         /// 
         /// Supplies the fields in the body, optionally setting the content-length header if
         /// applicable (all added fields were text or files, i.e. no streams).
-        pub fn client_request<U: IntoUrl>(&mut self, client: &Client, url: U) -> HyperResult<Response> {
+        pub fn client_request(&mut self, client: &Client, url: Uri) -> HyperResult<Response> {
             self.client_request_mut(client, url, |r| r)        
         }
 
@@ -410,7 +412,7 @@ mod hyper {
         ///
         /// Note that the body, and the `ContentType` and `ContentLength` headers will be
         /// overwritten, either by this method or by Hyper.
-        pub fn client_request_mut<U: IntoUrl, F: FnOnce(RequestBuilder) -> RequestBuilder>(&mut self, client: &Client, url: U,
+        pub fn client_request_mut<F: FnOnce(RequestBuilder) -> RequestBuilder>(&mut self, client: &Client, url: Uri,
                                                                                                    mut_fn: F) -> HyperResult<Response> {
 
             let mut fields = match self.prepare() {

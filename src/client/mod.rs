@@ -65,7 +65,7 @@ pub mod chained;
 
 pub mod dyn;
 
-//pub mod lazy;
+pub mod lazy;
 
 //mod sized;
 
