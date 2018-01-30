@@ -27,7 +27,7 @@ extern crate display_bytes;
 #[macro_use]
 extern crate futures;
 
-extern crate mime_guess;
+//extern crate mime_guess;
 extern crate rand;
 
 //extern crate tempdir;
@@ -38,8 +38,6 @@ pub extern crate hyper;
 pub extern crate mime;
 
 pub extern crate http;
-
-extern crate buf_redux;
 
 use rand::Rng;
 

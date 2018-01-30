@@ -12,6 +12,7 @@
 //! Also see: [`lazy::Multipart::client_request()`](../lazy/struct.Multipart.html#method.client_request)
 //! and [`lazy::Multipart::client_request_mut()`](../lazy/struct.Multipart.html#method.client_request_mut)
 //! (adaptors for `hyper::client::RequestBuilder`).
+extern crate mime;
 
 use hyper::header::{ContentType, ContentLength};
 use hyper::Method;

@@ -8,6 +8,9 @@
 //! default).
 //!
 //! Use this when sending POST requests with files to a server.
+extern crate mime;
+extern crate mime_guess;
+extern crate buf_redux;
 
 use self::mime::Mime;
 use self::buf_redux::BufReader;
